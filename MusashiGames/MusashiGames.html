@@ -69,12 +69,6 @@
             <div id="targetValue">Target: </div>
             <div id="targetNum">10</div>
             <div id="targetBar">
-                <button id="stopBtn" onclick="stopGame()">
-                    <img id="stop" src="IMG/StopIcon.png" alt="StopGame" width="40vh">
-                </button>
-                <button id="playBtn" onclick="pauseGame()">
-                    <img id="stop" src="IMG/PlayBtn.png" alt="StopGame" width="40vh">
-                </button>
                 <button id="pauseBtn" onclick="pauseGame()">
                     <img id="stop" src="IMG/PauseBtn.png" alt="StopGame" width="40vh">
                 </button>
@@ -95,13 +89,14 @@
         </div>
         <!-- Game Over -->
         <div id="gameOver">
-            <img id="gameOverIcon" src="IMG/GameOverIcon.png" width="300px">
+            <img id="gameOverIcon" src="IMG/MuLemon.png" width="300px">
             <br>
             <div id="gameOverCaption">GAME OVER</div>
+            <div id="tryAgain">
+                <button id="tryAgainBtn" onclick="gameNextStage()">Try Again</button>
+            </div>
         </div>
-        <div id="tryAgain">
-            <button id="tryAgainBtn" onclick="gameNextStage()">Try Again</button>
-        </div>
+        
        
         <!-- Score -->
         <div id="score">

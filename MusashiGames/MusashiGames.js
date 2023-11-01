@@ -4,9 +4,8 @@ const GAME_STATE_PAUSE = 'PAUSE';
 const GAME_STATE_END = 'END';
 
 let gameNextStageFlag = "lose";
-let targetScore = 10;
-
 let muHeadState = 'Normal';
+
 //Audio
 let vegAudio = new Audio("Audio/vegAudio.wav");
 vegAudio.volume = 0.3;
@@ -14,9 +13,6 @@ let chickenAudio = new Audio('Audio/chickenAudio.wav');
 chickenAudio.volume = 0.3;
 let lemonAudio = new Audio('Audio/lemonAudio.wav');
 lemonAudio.volume = 0.3;
-
-// const audioCTX = new AudioContext();
-
 
 // Canvas Sizes and Object Sizes
 const MAXCOL = 5;
@@ -36,7 +32,7 @@ const LEMON = new Image();
 LEMON.src = "IMG/Lemon.png";
 
 
-
+//NewBie Practise - global variable of current instance
 let musashiCatchGameStatus;
 
 class GameStatus {
@@ -52,6 +48,7 @@ class GameStatus {
         this.gameState = '';
         this.#gameObjects = [];
         this.playerInfo = {
+            targetScore: 10,
             score: 0,
             lives: 3,
             level: 1
@@ -239,7 +236,7 @@ function stopGame(gameStatus, winLose) {
         // nextLevel(gameStatus);
     }else{
         gameStatus.gameState = GAME_STATE_END;
-        document.getElementById("gameOverIcon").src = "IMG/GameOverIcon.png";
+        document.getElementById("gameOverIcon").src = "IMG/MuLemon.png";
         document.getElementById("gameOverCaption").innerHTML = "Game Over";
         document.getElementById("tryAgainBtn").innerHTML = "Try Again";
         document.getElementById("gameOver").style.visibility = "visible";
@@ -260,7 +257,6 @@ function gameMainLoop() {
             //Update next frame timestamp to now
             gameStatus.nextFrameTimestamp = currentTime;
             let timeElasped = gameStatus.nextFrameTimestamp - gameStatus.previousFrameTimestamp;
-            // console.log(timeElasped);
             //Calculate all movement, logic, score, etc...
             gameProcess(gameStatus, timeElasped);
             //Render the canvas of calculated result
@@ -336,7 +332,7 @@ function gameProcess(gameStatus, timeElasped) {
                 }else if(object.type == GameObjectType.STEAK){
                     chickenAudio.play();
                 }
-                if(gameStatus.playerInfo.score >= targetScore){
+                if(gameStatus.playerInfo.score >= gameStatus.playerInfo.targetScore){
                     stopGame(gameStatus, "win");
                 }
             }else if (object.positionY >= MAXGAMEHEIGHT){
@@ -356,8 +352,6 @@ function gameProcess(gameStatus, timeElasped) {
         generateGameObj(gameStatus);
         genGameObjFlag = false;
     }
-   
-    
     // notes: clauculate the postion base on the time elasped between previous frame and next frame
 }
 
@@ -448,11 +442,9 @@ function nextLevel(gameStatus){
     gameStatus.playerInfo.level++;
     let newLevel = gameStatus.playerInfo.level;
     console.log(newLevel);
-    targetScore = newLevel * 10;
-    gameStatus.playerInfo.score = 0;
-    console.log("targetScore");
+    gameStatus.playerInfo.targetScore = newLevel * 10;
     document.getElementById("scoreValue").innerHTML = 0;
-    document.getElementById("targetNum").innerHTML = targetScore;
+    document.getElementById("targetNum").innerHTML = gameStatus.playerInfo.targetScore;
     document.getElementById("gameOver").style.visibility = "hidden";
     document.getElementById("tryAgainBtn").style.visibility = "hidden";
 
