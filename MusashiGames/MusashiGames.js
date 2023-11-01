@@ -76,8 +76,6 @@ class GameStatus {
     forEachGameObject(processFunction) {
        this.#gameObjects.forEach(processFunction);
     }
-
-
 }
 
 const MOVEPERHEIGHT= 10;
@@ -142,7 +140,7 @@ function initialiseGame() {
     musashiCatchGameStatus.playerInfo.musashiHeadIdx = muHeadIdx;
 
     //create dropping game Object
-    generateGameObj(musashiCatchGameStatus);
+    generateRandomIdx(musashiCatchGameStatus);
 }
 
 function startGame() {
@@ -152,10 +150,10 @@ function startGame() {
     gameInput(musashiCatchGameStatus);
     musashiCatchGameStatus.previousFrameTimestamp = performance.now();
     gameMainLoop();
-    document.getElementById("gameStats").style.visibility = "visible"; 
-    document.getElementById("lives").style.visibility = "visible"; 
+    changeVisibility("gameStats", "visible");
+    changeVisibility("lives", "visible");
+    changeVisibility("score", "visible");
     musashiCatchGameStatus.mainCanvas.style.visibility = "visible";
-    document.getElementById("score").style.visibility = "visible"; 
     const OC = document.getElementsByClassName("originalCanvas");
     Array.from(OC).forEach((item) => {
         item.style.display = "none";
@@ -166,48 +164,32 @@ function startGame() {
     });
 }
 
+function generateRandomIdx(gameStatus){
+    let ranGameIdx = Math.round(Math.random()* 2);
+    if (ranGameIdx == 0){
 
-
-function generateGameObj(gameStatus) {
-    let ranGameObj = Math.round(Math.random()* 2);
-    let objSpeed = gameStatus.playerInfo.score + 15;
-    if (ranGameObj == 0){
-        // musashiCatchGameStatus.addGameObject(steak);
-        let steak = new GameObject(GameObjectType.STEAK, Math.round(Math.random()* (MAXCOL-1)), 0, 0, objSpeed, 140, (objCanvas)=>{
-        var ctx = objCanvas.getContext("2d");
-        objCanvas.width = STEAK.width;
-        objCanvas.height = STEAK.height;
-        ctx.clearRect(0, 0, objCanvas.width, objCanvas.height);
-        ctx.drawImage(STEAK, 0, 0);
-        })
-        let steakIdx = gameStatus.addGameObject(steak);
-        gameStatus.playerInfo.steakIdx = steakIdx;
-        return gameStatus;
-    }else if(ranGameObj == 1){
-        // musashiCatchGameStatus.addGameObject(grass);
-        let grass = new GameObject(GameObjectType.GRASS, Math.round(Math.random()* (MAXCOL-1)), 0, 0, objSpeed, 140, (objCanvas)=>{
-        var ctx = objCanvas.getContext("2d");
-        objCanvas.width = GRASS.width;
-        objCanvas.height = GRASS.height;
-        ctx.clearRect(0, 0, objCanvas.width, objCanvas.height);
-        ctx.drawImage(GRASS, 0, 0);
-        });
-        let grassIdx = gameStatus.addGameObject(grass);
-        gameStatus.playerInfo.grassIdx = grassIdx;
-        return gameStatus;
+        return generateGameObj(gameStatus, GameObjectType.STEAK, STEAK);
+    }else if (ranGameIdx == 1){
+        return generateGameObj(gameStatus, GameObjectType.GRASS, GRASS);
     }else{
-        // musashiCatchGameStatus.addGameObject(lemon);
-        let lemon = new GameObject(GameObjectType.LEMON, Math.round(Math.random()* (MAXCOL-1)), 0, 0, objSpeed, 140, (objCanvas)=>{
-        var ctx = objCanvas.getContext("2d");
-        objCanvas.width = LEMON.width;
-        objCanvas.height = LEMON.height;
-        ctx.clearRect(0, 0, objCanvas.width, objCanvas.height);
-        ctx.drawImage(LEMON, 0, 0);
-        });
-        let lemonIdx = gameStatus.addGameObject(lemon);
-        gameStatus.playerInfo.lemonIdx = lemonIdx;
-        return gameStatus;
+        return generateGameObj(gameStatus, GameObjectType.LEMON, LEMON);
     }
+
+}
+
+function generateGameObj(gameStatus, GameObjType, img) {
+    let objSpeed = gameStatus.playerInfo.score + 15;
+    let ranGameObj = new GameObject(GameObjType, Math.round(Math.random()* (MAXCOL-1)), 0, 0, objSpeed, 140, (objCanvas)=>{
+        var ctx = objCanvas.getContext("2d");
+        objCanvas.width = img.width;
+        objCanvas.height = img.height;
+        ctx.clearRect(0, 0, objCanvas.width, objCanvas.height);
+        ctx.drawImage(img, 0, 0);
+    })
+    gameStatus.addGameObject(ranGameObj);
+    return gameStatus;
+
+   
 }
 function pauseGame() {
     // optional
@@ -230,8 +212,8 @@ function stopGame(gameStatus, winLose) {
         document.getElementById("gameOverIcon").src = "IMG/MuVeg.png";
         document.getElementById("gameOverCaption").innerHTML = "You Win!";
         document.getElementById("tryAgainBtn").innerHTML = "Next Level";
-        document.getElementById("gameOver").style.visibility = "visible";
-        document.getElementById("tryAgainBtn").style.visibility = "visible";
+        changeVisibility("gameOver", "visible");
+        changeVisibility("tryAgainBtn", "visible");
         gameNextStageFlag = "win";
         // nextLevel(gameStatus);
     }else{
@@ -239,8 +221,8 @@ function stopGame(gameStatus, winLose) {
         document.getElementById("gameOverIcon").src = "IMG/MuLemon.png";
         document.getElementById("gameOverCaption").innerHTML = "Game Over";
         document.getElementById("tryAgainBtn").innerHTML = "Try Again";
-        document.getElementById("gameOver").style.visibility = "visible";
-        document.getElementById("tryAgainBtn").style.visibility = "visible";
+        changeVisibility("gameOver", "visible");
+        changeVisibility("tryAgainBtn", "visible");
         gameNextStageFlag = "lose";
         console.log(gameNextStageFlag);
     }
@@ -267,10 +249,7 @@ function gameMainLoop() {
             gameRendering(gameStatus.mainCanvas, gameStatus);
         }
     }
-    
-   
 }
-
 
 function gameInput(gameStatus) {
     // get user input
@@ -320,13 +299,13 @@ function gameProcess(gameStatus, timeElasped) {
                     }
                     if(gameStatus.playerInfo.lives == 3){
                         gameStatus.playerInfo.lives--;
-                        document.getElementById("lemon1").style.visibility = "hidden";
+                        changeVisibility("lemon1", "hidden");
                     }else if(gameStatus.playerInfo.lives == 2){
                         gameStatus.playerInfo.lives--;
-                        document.getElementById("lemon2").style.visibility = "hidden";
+                        changeVisibility("lemon2", "hidden");
                     }else if(gameStatus.playerInfo.lives == 1){
                         gameStatus.playerInfo.lives--;
-                        document.getElementById("lemon3").style.visibility = "hidden";
+                        changeVisibility("lemon3", "hidden");
                         stopGame(gameStatus, "lose"); 
                     }
                 }else if(object.type == GameObjectType.STEAK){
@@ -349,7 +328,7 @@ function gameProcess(gameStatus, timeElasped) {
     });
 
     if (genGameObjFlag == true){
-        generateGameObj(gameStatus);
+        generateRandomIdx(gameStatus);
         genGameObjFlag = false;
     }
     // notes: clauculate the postion base on the time elasped between previous frame and next frame
@@ -387,7 +366,6 @@ function gameRendering(canvas, gameStatus) {
     // 4. if game is ended(gameState = 'Stop'), render a ending screen
 }
 
-
 // Music Toggle
 function toggleMute(){
     var homeMusicInstance = document.getElementById('musicBtn');
@@ -423,7 +401,6 @@ function gameNextStage(){
         console.log("next level");
         nextLevel(musashiCatchGameStatus);
     }
-    
 }
 //Change HTML Variable
 function docWrite(variable) {
@@ -438,15 +415,13 @@ function refreshPage(){
 //Next Level
 function nextLevel(gameStatus){
     console.log("next level to start");
-    gameStatus.playerInfo.score = 0;
     gameStatus.playerInfo.level++;
     let newLevel = gameStatus.playerInfo.level;
     console.log(newLevel);
     gameStatus.playerInfo.targetScore = newLevel * 10;
-    document.getElementById("scoreValue").innerHTML = 0;
     document.getElementById("targetNum").innerHTML = gameStatus.playerInfo.targetScore;
-    document.getElementById("gameOver").style.visibility = "hidden";
-    document.getElementById("tryAgainBtn").style.visibility = "hidden";
+    changeVisibility("gameOver", "hidden");
+    changeVisibility("tryAgainBtn", "hidden");
 
     gameStatus.gameState = GAME_STATE_START;
     gameStatus.previousFrameTimestamp = performance.now();
@@ -462,13 +437,17 @@ function muHeadToggle(muHeadState){
         MUHEADIMG.src = "IMG/MuLemon.png";
         setTimeout(() => {  MUHEADIMG.src = "IMG/MuGameHead.png"; }, 300);
     }
-    
 }
 
 //Tutorial Tab
 function closeTab(){
-    document.getElementById("gameTutorial").style.visibility = "hidden";
+    changeVisibility("gameTutorial", "hidden");
 }
 function openTutorial(){
-    document.getElementById("gameTutorial").style.visibility = "visible";
+    changeVisibility("gameTutorial", "visible");
+}
+
+//Change Visibility
+function changeVisibility(elementId, toggle){
+    document.getElementById(elementId).style.visibility = toggle;
 }
