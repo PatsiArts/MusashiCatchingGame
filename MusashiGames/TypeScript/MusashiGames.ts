@@ -1,3 +1,4 @@
+import CanvasJS from 'canvasjs';
 const GAME_STATE_NEW = 'New';
 const GAME_STATE_START = 'START';
 const GAME_STATE_PAUSE = 'PAUSE';
@@ -33,11 +34,11 @@ LEMON.src = "IMG/Lemon.png";
 
 
 //NewBie Practise - global variable of current instance
-let musashiCatchGameStatus;
+let musashiCatchGameStatus: GameStatus;
 
 class GameStatus {
-    mainCanvas;
-    ctx;
+    mainCanvas : CanvasJS;
+    ctx : any;
     gameState;
     #gameObjects;
     playerInfo;
@@ -105,10 +106,6 @@ class GameObject {
         this.velocityY = velocityY;
         this.maxSpeed = 10;
         this.renderingFunction = renderingFunction;
-    }
-
-    calculateMove(timeElasped) {
-
     }
 }
 
@@ -191,7 +188,7 @@ function generateGameObj(gameStatus, GameObjType, img) {
 
    
 }
-function pauseGame() {
+function pauseGame(): void {
     // optional
     // 1. stop the game loop if needed
     // 2. update the game state to 'Pause'
@@ -204,7 +201,7 @@ function pauseGame() {
     
 }
 
-function stopGame(gameStatus, winLose) {
+function stopGame(gameStatus: GameStatus, winLose: String): void {
     // 1. stop the game loop if needed
     // 2. update the game state to 'Stop'
     if (winLose == "win"){
@@ -251,7 +248,7 @@ function gameMainLoop() {
     }
 }
 
-function gameInput(gameStatus) {
+function gameInput(gameStatus: GameStatus) {
     // get user input
     let muHead = gameStatus.playerInfo.musashiHeadIdx;
     let muHeadObj = gameStatus.getGameObject(muHead);
@@ -272,7 +269,7 @@ function gameInput(gameStatus) {
     // e.g. when user press 'LEFT', update the movement of the object to left
 }
 
-function gameProcess(gameStatus, timeElasped) {
+function gameProcess(gameStatus: GameStatus, timeElasped: number) {
     // 1. calucluate the position of all object in next frame
     let muHead = gameStatus.getGameObject(gameStatus.playerInfo.musashiHeadIdx);
     let muHeadPoY = muHead.positionY;
@@ -334,7 +331,7 @@ function gameProcess(gameStatus, timeElasped) {
     // notes: clauculate the postion base on the time elasped between previous frame and next frame
 }
 
-function gameRendering(canvas, gameStatus) {
+function gameRendering(canvas: any, gameStatus: GameStatus) {
     //Render the canvas base on the current status of the game
     if (gameStatus.gameState == GAME_STATE_START) {
         //Muhead Render
@@ -451,3 +448,15 @@ function openTutorial(){
 function changeVisibility(elementId, toggle){
     document.getElementById(elementId).style.visibility = toggle;
 }
+
+
+
+
+
+
+
+
+
+
+// Compile ts to js in New Terminal (watch continuously upon save)
+// tsc musashiCatchGameStatus.ts -w
