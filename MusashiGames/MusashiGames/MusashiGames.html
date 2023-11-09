@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="MusashiGames.js" defer></script>
+        <link rel="stylesheet" href = "MusashiGames.css">
+    </head>
+    <!-- Top Bar -->
+    <body onload="initialiseGame(); autoplay()">
+        <img id="MuGameNavi" src="IMG/MuGameNavi.png" width="400px"/>
+        <div id="navBar">
+            <img id="Mulogo" src="IMG/MuLogoWhite.png" width="100px"/>
+            <div id="rightBar">
+                <button class="backPageBtn" onclick="refreshPage()">
+                    <img src="IMG/BackPage.png" alt="BackPage" width="50px">
+                    <img class="backHover" src="IMG/BackPageHover.png" alt="BackPage" width="50px">
+                </button>
+                <button class="shareBtn" onclick="">
+                    <img id="share" src="IMG/ShareLogo.png" alt="Share" width="50px">
+                    <img class="shareHover" src="IMG/ShareBtnHover.png" alt="Share" width="50px">
+                </button>
+                </button>
+                <audio id="musicBtn">
+                    <source src="Audio/Moonlight3.mov" type="audio/mp3">
+                </audio>
+                <button class="musicBtn" onclick="toggleMute()">
+                    <img id="VOn" src="IMG/VOn.png" alt="Music" width="50px">
+                    <img class="vOnHover" src="IMG/VOnHover.png" alt="Music" width="50px">
+                </button>
+            </div>
+        </div>
+        <!-- Main Body -->
+        <div id="lowerBG">
+            <div class="originalCanvas">
+                <div id="gameCaption">
+                    <div>Musashi</div>
+                    <div>Catching Game</div>
+                    <img id="MuImg" src="IMG/DogGameImg.png"/>
+                </div>
+                <!-- <img id="rightArrow" src="IMG/rightArrrow.jpg" width="150px"/> -->
+                <button id="startButton" onclick="startGame()">
+                <img id="startButton" src="IMG/GameStartLogo.png" width="100px"/>
+                </button>
+                <button id="howToPlay" onclick="openTutorial()">
+                    <img src="IMG/HowToPlayBtn.png" width="150px"/>
+                </button>
+                <img id="MuGameBgDeco1" src="IMG/MuGameBgDeco1.png"/>
+            </div>
+        </div>
+        <!-- Game Tutorial -->
+        <div id="gameTutorial">
+            <div class="Tutorial1">
+                <img src="IMG/MuVeg.png" alt="HappyMuFace" width="150px"/> 
+                <h2> I Love Broccolli </h2>
+                <button id="closeTutorial" onclick="closeTab()">
+                    <img src="IMG/CloseTab.png" width="50px"/>
+                </button>
+            </div>
+            <div class="Tutorial1">
+                <img src="IMG/MuLemon.png" alt="SourMuFace" width="150px"/>
+                <h2> I Hate Lemon ! </h2>
+            </div>
+            <div class="Tutorial1">
+                <img src="IMG/MuGameHead.png" alt="NormalMuFace" width="150px"/>
+                <h2> I Don't Mind Chimken </h2>        
+            </div>
+        </div>
+        <!-- Game Stats -->
+        <div id="gameStats">
+            <div id="targetValue">Target: </div>
+            <div id="targetNum">10</div>
+            <div id="targetBar">
+                <button id="pauseBtn" onclick="pauseGame()">
+                    <img id="stop" src="IMG/PauseBtn.png" alt="StopGame" width="40vh">
+                </button>
+            </div>
+        </div>
+        <!-- Game Canvas -->
+        <div id="gameCanvas">
+            <div id="lives">
+                <img id="lemon1" src="IMG/Lemon.png" width="50px">
+                <img id="lemon2" src="IMG/Lemon.png" width="50px">
+                <img id="lemon3" src="IMG/Lemon.png" width="50px">
+                <div id="livesCaption">Lives</div>
+            </div>
+            <div>
+                <canvas id="myCanvas" style="border:1px solid #000000;">
+                </canvas>
+            </div>
+        </div>
+        <!-- Game Over -->
+        <div id="gameOver">
+            <img id="gameOverIcon" src="IMG/MuLemon.png" width="300px">
+            <br>
+            <div id="gameOverCaption">GAME OVER</div>
+            <div id="tryAgain">
+                <button id="tryAgainBtn" onclick="gameNextStage()">Try Again</button>
+            </div>
+        </div>
+        
+       
+        <!-- Score -->
+        <div id="score">
+            <div id="scoreLabel"> Current Score:  </div>
+            <div id="scoreValue"> 0 </div>
+        </div>
+    </body>
+    <footer>
+        <div id="footerText">
+        Art: Patsi <br>
+        Copyright &copy; copyright reserved<br>
+        </div>
+    </footer>
+</html>
