@@ -4,7 +4,7 @@ const GAME_STATE_PAUSE = 'PAUSE';
 const GAME_STATE_END = 'END';
 
 let gameNextStageFlag = "lose";
-let muHeadState = 'Normal';
+// let muHeadState = 'Normal';
 
 //Audio
 let vegAudio = new Audio("Audio/vegAudio.wav");
@@ -33,21 +33,27 @@ LEMON.src = "IMG/Lemon.png";
 
 
 //NewBie Practise - global variable of current instance
-let musashiCatchGameStatus;
+let musashiCatchGameStatus: GameStatus;
+
+//Setting Types
+type ProcessFunction = (gameObject: GameObject) => void;
+type RenderingFunction = (objCanvas: HTMLCanvasElement) => void;
+
 
 class GameStatus {
-    mainCanvas;
-    ctx;
+    mainCanvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
     gameState;
-    #gameObjects;
+    #gameObjects: GameObject[];
     playerInfo;
     previousFrameTimestamp;
     nextFrameTimestamp;
 
-    constructor() {
+    constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
         this.gameState = '';
         this.#gameObjects = [];
         this.playerInfo = {
+            gameObjectIdx: 0,
             targetScore: 10,
             score: 0,
             lives: 3,
@@ -55,25 +61,27 @@ class GameStatus {
         };
         this.previousFrameTimestamp = performance.now();
         this.nextFrameTimestamp = performance.now();
+        this.mainCanvas = canvas;
+        this.ctx = ctx;
     }
 
-    addGameObject(gameObject) {
+    addGameObject(gameObject: GameObject) {
         return this.#gameObjects.push(gameObject) - 1;
     }
 
-    removeGameObject(gameObject) {
+    removeGameObject(gameObject: GameObject) {
        return this.#gameObjects.splice(this.#gameObjects.indexOf(gameObject),1);
     }
 
-    removeGameObjectByIdx(gameObjectIdx) {
+    removeGameObjectByIdx(gameObjectIdx: number) {
        return this.#gameObjects.splice(gameObjectIdx,1);
     }
 
-    getGameObject(gameObjectIndex) {
+    getGameObject(gameObjectIndex: number) {
         return this.#gameObjects[gameObjectIndex];
     }
 
-    forEachGameObject(processFunction) {
+    forEachGameObject(processFunction: ProcessFunction) {
        this.#gameObjects.forEach(processFunction);
     }
 }
@@ -94,7 +102,17 @@ class GameObjectType {
 }
 
 class GameObject {
-    constructor(type, positionX, positionY, velocityX, velocityY, size, renderingFunction) {
+    
+    type: GameObjectType;
+    objCanvas: HTMLCanvasElement;
+    positionX: number;
+    positionY: number;
+    velocityX: number;
+    velocityY: number; 
+    maxSpeed = 10;
+    renderingFunction: RenderingFunction;
+
+    constructor(type: GameObjectType, positionX: number, positionY: number, velocityX: number, velocityY: number, size: number, renderingFunction: RenderingFunction) {
         this.type = type;
         this.objCanvas = document.createElement("canvas");
         this.objCanvas.width = size;
@@ -103,20 +121,17 @@ class GameObject {
         this.positionY = positionY;
         this.velocityX = velocityX;
         this.velocityY = velocityY;
-        this.maxSpeed = 10;
         this.renderingFunction = renderingFunction;
-    }
-
-    calculateMove(timeElasped) {
-
     }
 }
 
 function initialiseGame() {
     // 1. initialise all nessary game status of the game
-    musashiCatchGameStatus = new GameStatus();
-    musashiCatchGameStatus.mainCanvas = document.getElementById("myCanvas"); 
-    musashiCatchGameStatus.ctx = musashiCatchGameStatus.mainCanvas.getContext("2d");
+    let mainCanvas = document.getElementById("myCanvas") as HTMLCanvasElement; 
+    let ctx = mainCanvas.getContext("2d") as CanvasRenderingContext2D;
+    musashiCatchGameStatus = new GameStatus(mainCanvas, ctx);
+    musashiCatchGameStatus.mainCanvas = mainCanvas; 
+    musashiCatchGameStatus.ctx = ctx;
     musashiCatchGameStatus.ctx.imageSmoothingEnabled = true;
     musashiCatchGameStatus.ctx.imageSmoothingQuality = 'high'; 
     
@@ -127,17 +142,17 @@ function initialiseGame() {
     musashiCatchGameStatus.playerInfo.level = 1;
 
     //Create controllable Musashi
-    this.canvas = document.createElement("canvas");
+    // this.canvas = document.createElement("canvas");
 
-    let mushHead = new GameObject(GameObjectType.MUSASHI_HEAD, 2, MAXGAMEHEIGHT-MOVEPERHEIGHT, 3, 0, 0, (objCanvas)=>{
+    let mushHead = new GameObject(GameObjectType.MUSASHI_HEAD, 2, MAXGAMEHEIGHT-MOVEPERHEIGHT, 3, 0, 0, (objCanvas: HTMLCanvasElement)=>{
         objCanvas.width = MUHEADIMG.width;
         objCanvas.height = MUHEADIMG.height;
-        var ctx = objCanvas.getContext("2d");
+        var ctx = objCanvas.getContext("2d") as CanvasRenderingContext2D;
         ctx.clearRect(0, 0, objCanvas.width, objCanvas.height);
         ctx.drawImage(MUHEADIMG, 0, 0);
     });
     let muHeadIdx = musashiCatchGameStatus.addGameObject(mushHead);
-    musashiCatchGameStatus.playerInfo.musashiHeadIdx = muHeadIdx;
+    musashiCatchGameStatus.playerInfo.gameObjectIdx = muHeadIdx;
 
     //create dropping game Object
     generateRandomIdx(musashiCatchGameStatus);
@@ -154,7 +169,7 @@ function startGame() {
     changeVisibility("lives", "visible");
     changeVisibility("score", "visible");
     musashiCatchGameStatus.mainCanvas.style.visibility = "visible";
-    const OC = document.getElementsByClassName("originalCanvas");
+    const OC = document.getElementsByClassName("originalCanvas") as HTMLCollectionOf<HTMLElement>;
     Array.from(OC).forEach((item) => {
         item.style.display = "none";
     });
@@ -164,7 +179,7 @@ function startGame() {
     });
 }
 
-function generateRandomIdx(gameStatus){
+function generateRandomIdx(gameStatus: GameStatus){
     let ranGameIdx = Math.round(Math.random()* 2);
     if (ranGameIdx == 0){
 
@@ -177,10 +192,10 @@ function generateRandomIdx(gameStatus){
 
 }
 
-function generateGameObj(gameStatus, GameObjType, img) {
+function generateGameObj(gameStatus: GameStatus, GameObjType: GameObjectType, img: HTMLImageElement) {
     let objSpeed = gameStatus.playerInfo.score + 15;
-    let ranGameObj = new GameObject(GameObjType, Math.round(Math.random()* (MAXCOL-1)), 0, 0, objSpeed, 140, (objCanvas)=>{
-        var ctx = objCanvas.getContext("2d");
+    let ranGameObj = new GameObject(GameObjType, Math.round(Math.random()* (MAXCOL-1)), 0, 0, objSpeed, 140, (objCanvas: HTMLCanvasElement)=>{
+        var ctx = objCanvas.getContext("2d") as CanvasRenderingContext2D;
         objCanvas.width = img.width;
         objCanvas.height = img.height;
         ctx.clearRect(0, 0, objCanvas.width, objCanvas.height);
@@ -191,7 +206,7 @@ function generateGameObj(gameStatus, GameObjType, img) {
 
    
 }
-function pauseGame() {
+function pauseGame(): void {
     // optional
     // 1. stop the game loop if needed
     // 2. update the game state to 'Pause'
@@ -204,23 +219,24 @@ function pauseGame() {
     
 }
 
-function stopGame(gameStatus, winLose) {
+function stopGame(gameStatus: GameStatus, winLose: String): void {
     // 1. stop the game loop if needed
     // 2. update the game state to 'Stop'
+    let stopGameImg = document.getElementById("gameOverIcon") as HTMLImageElement;
     if (winLose == "win"){
         gameStatus.gameState = GAME_STATE_END;
-        document.getElementById("gameOverIcon").src = "IMG/MuVeg.png";
-        document.getElementById("gameOverCaption").innerHTML = "You Win!";
-        document.getElementById("tryAgainBtn").innerHTML = "Next Level";
+        stopGameImg.src = "IMG/MuVeg.png";
+        document.getElementById("gameOverCaption")!.innerHTML = "You Win!";
+        document.getElementById("tryAgainBtn")!.innerHTML = "Next Level";
         changeVisibility("gameOver", "visible");
         changeVisibility("tryAgainBtn", "visible");
         gameNextStageFlag = "win";
         // nextLevel(gameStatus);
     }else{
         gameStatus.gameState = GAME_STATE_END;
-        document.getElementById("gameOverIcon").src = "IMG/MuLemon.png";
-        document.getElementById("gameOverCaption").innerHTML = "Game Over";
-        document.getElementById("tryAgainBtn").innerHTML = "Try Again";
+        stopGameImg.src = "IMG/MuLemon.png";
+        document.getElementById("gameOverCaption")!.innerHTML = "Game Over";
+        document.getElementById("tryAgainBtn")!.innerHTML = "Try Again";
         changeVisibility("gameOver", "visible");
         changeVisibility("tryAgainBtn", "visible");
         gameNextStageFlag = "lose";
@@ -251,9 +267,9 @@ function gameMainLoop() {
     }
 }
 
-function gameInput(gameStatus) {
+function gameInput(gameStatus: GameStatus) {
     // get user input
-    let muHead = gameStatus.playerInfo.musashiHeadIdx;
+    let muHead = gameStatus.playerInfo.gameObjectIdx;
     let muHeadObj = gameStatus.getGameObject(muHead);
     addEventListener("keydown", (event) => {
         if(event.key == "ArrowLeft"){
@@ -272,12 +288,12 @@ function gameInput(gameStatus) {
     // e.g. when user press 'LEFT', update the movement of the object to left
 }
 
-function gameProcess(gameStatus, timeElasped) {
+function gameProcess(gameStatus: GameStatus, timeElasped: number) {
     // 1. calucluate the position of all object in next frame
-    let muHead = gameStatus.getGameObject(gameStatus.playerInfo.musashiHeadIdx);
+    let muHead = gameStatus.getGameObject(gameStatus.playerInfo.gameObjectIdx);
     let muHeadPoY = muHead.positionY;
     let muHeadPoX = muHead.positionX;
-    let objToBeRemoved = [];
+    let objToBeRemoved: GameObject[] = [];
     let genGameObjFlag = false;
     gameStatus.forEachGameObject((object) => {
         if (object.type != GameObjectType.MUSASHI_HEAD){
@@ -285,17 +301,18 @@ function gameProcess(gameStatus, timeElasped) {
             if (object.positionY >= (muHeadPoY - MOVEPERHEIGHT) && object.positionX == muHeadPoX){
                 genGameObjFlag = true;
                 objToBeRemoved.push(object);
+                let updateScore = document.getElementById("scoreValue") as HTMLElement;
                 if (object.type == GameObjectType.GRASS){
                     vegAudio.play();
                     muHeadToggle('Happy');
                     gameStatus.playerInfo.score++;
-                    document.getElementById("scoreValue").innerHTML = gameStatus.playerInfo.score;
+                    updateScore.innerHTML = String(gameStatus.playerInfo.score);
                 }else if(object.type == GameObjectType.LEMON){
                     muHeadToggle('Sad');
                     lemonAudio.play();
                     if(gameStatus.playerInfo.score > 0){
                         gameStatus.playerInfo.score--;
-                        document.getElementById("scoreValue").innerHTML = gameStatus.playerInfo.score;
+                        updateScore.innerHTML = String(gameStatus.playerInfo.score);
                     }
                     if(gameStatus.playerInfo.lives == 3){
                         gameStatus.playerInfo.lives--;
@@ -320,21 +337,21 @@ function gameProcess(gameStatus, timeElasped) {
                 genGameObjFlag = true;
             }
         }
-     
     });
     //Detect and handle any collision
     objToBeRemoved.forEach((object) => {
         gameStatus.removeGameObject(object);
     });
 
-    if (genGameObjFlag == true){
+    // @ts-ignore (Disable ts false alarm)
+    if (genGameObjFlag === true) {
         generateRandomIdx(gameStatus);
         genGameObjFlag = false;
     }
     // notes: clauculate the postion base on the time elasped between previous frame and next frame
 }
 
-function gameRendering(canvas, gameStatus) {
+function gameRendering(canvas: any, gameStatus: GameStatus) {
     //Render the canvas base on the current status of the game
     if (gameStatus.gameState == GAME_STATE_START) {
         //Muhead Render
@@ -368,20 +385,20 @@ function gameRendering(canvas, gameStatus) {
 
 // Music Toggle
 function toggleMute(){
-    var homeMusicInstance = document.getElementById('musicBtn');
+    var homeMusicInstance = document.getElementById('musicBtn') as HTMLMediaElement;
     homeMusicInstance.muted=!homeMusicInstance.muted;
     toggleMuteImg(homeMusicInstance.muted);
 
 }
 function autoplay(){
-    var homeMusicInstance = document.getElementById('musicBtn');
+    var homeMusicInstance = document.getElementById('musicBtn') as HTMLMediaElement;
     homeMusicInstance.volume = 0.2;
     homeMusicInstance.play();
 }
-function toggleMuteImg(muted){
-    var muteIcon = document.getElementById('VOn');
-    var muteIconHover = document.getElementsByClassName('vOnHover');
-   if(muted==true){
+function toggleMuteImg(muted: boolean){
+    var muteIcon = document.getElementById('VOn') as HTMLImageElement;
+    var muteIconHover = document.getElementsByClassName('vOnHover') as HTMLCollectionOf<HTMLImageElement>;
+   if(muted == true){
     muteIcon.src = "IMG/VOff.png";
     Array.from(muteIconHover).forEach((item) => {
         item.src = "IMG/VOffHover.png";
@@ -403,7 +420,7 @@ function gameNextStage(){
     }
 }
 //Change HTML Variable
-function docWrite(variable) {
+function docWrite(variable: any) {
     document.write(variable);
 }
 
@@ -413,13 +430,14 @@ function refreshPage(){
 }
 
 //Next Level
-function nextLevel(gameStatus){
+function nextLevel(gameStatus: GameStatus){
     console.log("next level to start");
     gameStatus.playerInfo.level++;
     let newLevel = gameStatus.playerInfo.level;
     console.log(newLevel);
     gameStatus.playerInfo.targetScore = newLevel * 10;
-    document.getElementById("targetNum").innerHTML = gameStatus.playerInfo.targetScore;
+    let newTargetScore = document.getElementById("targetNum") as HTMLElement;
+    newTargetScore.innerHTML = String(gameStatus.playerInfo.targetScore);
     changeVisibility("gameOver", "hidden");
     changeVisibility("tryAgainBtn", "hidden");
 
@@ -429,7 +447,7 @@ function nextLevel(gameStatus){
 }
 
 //Change Mu Expression
-function muHeadToggle(muHeadState){
+function muHeadToggle(muHeadState: String){
     if (muHeadState == 'Happy') {
         MUHEADIMG.src = "IMG/MuVeg.png";
         setTimeout(() => {  MUHEADIMG.src = "IMG/MuGameHead.png"; }, 300);
@@ -448,6 +466,19 @@ function openTutorial(){
 }
 
 //Change Visibility
-function changeVisibility(elementId, toggle){
-    document.getElementById(elementId).style.visibility = toggle;
+function changeVisibility(elementId: any, toggle: String){
+    let element: any = document.getElementById(elementId);
+    element.style.visibility = toggle;
 }
+
+
+
+
+
+
+
+
+
+
+// Compile ts to js in New Terminal (watch continuously upon save)
+// tsc musashiCatchGameStatus.ts -w
